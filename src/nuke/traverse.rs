@@ -27,6 +27,7 @@ pub fn add_dirs_to_deque_recurse(dir: &Path, deque: &Worker<String>) -> io::Resu
             let path = entry.path();
             if path.is_dir() {
                 add_dirs_to_deque_recurse(&path, deque);
+                deque.push(path.display().to_string());
             } else {
                 deque.push(path.display().to_string());
             }

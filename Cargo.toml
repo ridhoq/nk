@@ -1,0 +1,7 @@
+[package]
+name = "nuke"
+version = "0.1.0"
+authors = ["Ridwan Hoq <ridwanhoq@gmail.com>"]
+
+[dependencies]
+crossbeam-deque = "0.6"

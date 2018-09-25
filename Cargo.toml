@@ -5,3 +5,4 @@ authors = ["Ridwan Hoq <ridwanhoq@gmail.com>"]
 
 [dependencies]
 crossbeam-deque = "0.6"
+walkdir = "2"

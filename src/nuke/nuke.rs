@@ -40,15 +40,15 @@ pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
     }
 
     let mut file_threads = vec![];
-    for _ in 0..num_threads {
+    for thread_num in 0..num_threads {
         let file_stealer = file_s.clone();
-        file_threads.push(thread::spawn(move || {
+        file_threads.push(thread::Builder::new().name(format!("thread-{}", thread_num).to_string()).spawn(move || {
             while !file_stealer.is_empty() {
                 let stolen = file_stealer.steal();
                 match stolen {
                     Steal::Data(entry) => {
                         let path = Path::new(&entry);
-                        println!("deleting file: {}", path.display());
+                        println!("{} is deleting file: {}", thread::current().name().unwrap(), path.display());
                         fs::remove_file(path).expect("Failed to remove a file");
                     },
                     Steal::Empty => {},
@@ -59,19 +59,19 @@ pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
     }
     for t in file_threads {
         // Wait for the thread to finish. Returns a result.
-        let _ = t.join();
+        let _ = t.unwrap().join();
     }
 
     let mut dir_threads = vec![];
-    for _ in 0..num_threads {
+    for thread_num in 0..num_threads {
         let dir_stealer = dir_s.clone();
-        dir_threads.push(thread::spawn(move || {
+        dir_threads.push(thread::Builder::new().name(format!("thread-{}", thread_num).to_string()).spawn(move || {
             while !dir_stealer.is_empty() {
                 let stolen = dir_stealer.steal();
                 match stolen {
                     Steal::Data(entry) => {
                         let path = Path::new(&entry);
-                        println!("deleting dir: {}", path.display());
+                        println!("{} is deleting dir: {}", thread::current().name().unwrap(), path.display());
                         fs::remove_dir(path).expect("Failed to remove a dir");
                     },
                     Steal::Empty => {},
@@ -82,7 +82,7 @@ pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
     }
     for t in dir_threads {
         // Wait for the thread to finish. Returns a result.
-        let _ = t.join();
+        let _ = t.unwrap().join();
     }
     Ok(())
 }

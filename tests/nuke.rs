@@ -15,7 +15,7 @@ fn create_dir(path: &str) {
 }
 
 fn setup() {
-    fs::remove_dir_all(ROOT);
+    fs::remove_dir_all(ROOT).expect("couldn't remove dir");
 }
 
 // https://medium.com/@ericdreichert/test-setup-and-teardown-in-rust-without-a-framework-ba32d97aa5ab

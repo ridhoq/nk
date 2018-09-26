@@ -63,7 +63,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "nuke"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "crossbeam-deque 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "priority-queue 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",

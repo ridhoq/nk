@@ -2,3 +2,4 @@
 Dockerfile
 target/
 node_modules/
+tmp/

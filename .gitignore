@@ -3,3 +3,4 @@
 node_modules
 node_modules_nuke
 node_modules_rmdir
+/tmp

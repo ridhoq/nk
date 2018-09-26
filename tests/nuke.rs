@@ -11,7 +11,7 @@ fn join_path(base: &str, join: &str) -> String {
 }
 
 fn create_dir(path: &str) {
-    fs::create_dir_all(path).expect("");
+    fs::create_dir_all(path).expect("couldn't create dir");
 }
 
 fn setup() {

@@ -3,7 +3,7 @@ extern crate rand;
 
 use std::fs;
 use std::panic;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -51,28 +51,35 @@ fn it_deletes_an_empty_dir() {
 #[test]
 fn it_deletes_a_nested_dir() {
     run_test(|root| {
-        let base = root.join("nested-dir/");
-        let path = base.join("hey/wassup/hello");
+        let base = root.join("nested-dir");
+        let path = base.join("hey").join("wassup").join("hello");
         create_dir(&path);
         assert!(nuke::nuke(&base).is_ok());
-        assert_eq!(Path::new(&base).exists(), false);
+        assert_eq!(base.exists(), false);
     });
 }
 
 #[test]
 fn it_deletes_a_tree_of_nested_dir() {
     run_test(|root| {
-        let path = root.join("tree-nested-dir/");
-        let path1 = path.join("hey/wassup/hello");
+        let path = root.join("tree-nested-dir");
+        let path1 = path.join("hey").join("wassup").join("hello");
         create_dir(&path1);
-        let path2 = path.join("you/already/know");
+        let path2 = path.join("you").join("already").join("know");
         create_dir(&path2);
-        let path3 = path.join("pls/ok");
+        let path3 = path.join("pls").join("ok");
         create_dir(&path3);
-        let path4 = path.join("i/had/to/do/it/to/em");
+        let path4 = path
+            .join("i")
+            .join("had")
+            .join("to")
+            .join("do")
+            .join("it")
+            .join("to")
+            .join("em");
         create_dir(&path4);
         assert!(nuke::nuke(&path).is_ok());
-        assert_eq!(Path::new(&path).exists(), false);
+        assert_eq!(path.exists(), false);
     });
 }
 
@@ -80,7 +87,7 @@ fn it_deletes_a_tree_of_nested_dir() {
 fn it_does_nothing_if_non_existent_dir() {
     run_test(|root| {
         create_dir(&root);
-        let path = root.join("non-existent-dir/");
+        let path = root.join("non-existent-dir");
         assert!(nuke::nuke(&path).is_ok());
     })
 }

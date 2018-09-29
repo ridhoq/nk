@@ -5,24 +5,23 @@ extern crate walkdir;
 use std::collections::HashMap;
 use std::fs;
 use std::io::Result as StdResult;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::thread;
 
 use self::crossbeam_deque::{self as deque, Steal, Stealer, Worker};
 use self::walkdir::WalkDir;
 
 struct NukeDeque {
-    worker: Worker<String>,
-    stealer: Stealer<String>,
+    worker: Worker<PathBuf>,
+    stealer: Stealer<PathBuf>,
 }
 
-pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
-    if !Path::new(dir_to_nuke).exists() {
+pub fn nuke(dir_to_nuke: &PathBuf) -> StdResult<()> {
+    if !dir_to_nuke.exists() {
         return Ok(());
     }
 
     let num_threads = num_cpus::get();
-    println!("num of threads: {}", num_threads);
     let mut depth_to_deque: HashMap<usize, NukeDeque> = HashMap::new();
     let mut max_depth: usize = 0;
 
@@ -36,10 +35,10 @@ pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
         depth_to_deque
             .entry(depth)
             .and_modify(|e| {
-                e.worker.push(entry.path().display().to_string());
+                e.worker.push(PathBuf::from(entry.path()));
             }).or_insert_with(|| {
                 let (worker, stealer) = deque::fifo();
-                worker.push(entry.path().display().to_string());
+                worker.push(PathBuf::from(entry.path()));
                 NukeDeque { worker, stealer }
             });
     }
@@ -58,15 +57,8 @@ pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
                             while !thread_stealer.is_empty() {
                                 let stolen = thread_stealer.steal();
                                 match stolen {
-                                    Steal::Data(entry) => {
-                                        let path = Path::new(&entry);
-                                        /*
-                                    println!(
-                                        "{} is deleting: {}",
-                                        thread::current().name().unwrap(),
-                                        path.display()
-                                    );
-                                    */
+                                    Steal::Data(path_buf) => {
+                                        let path = path_buf.as_path();
                                         if path.is_dir() {
                                             fs::remove_dir(path).expect("Failed to remove a dir");
                                         }

@@ -3,39 +3,32 @@ extern crate rand;
 
 use std::fs;
 use std::panic;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
 
-fn join_path(base: &str, join: &str) -> String {
-    format!("{b}{j}", b = base.to_string(), j = join.to_string())
+fn create_dir(path: &PathBuf) {
+    fs::create_dir_all(path).expect("couldn't create dir");
 }
 
-fn create_dir(path: &str) {
-    fs::create_dir_all(path).expect(&format!("couldn't create dir: {}", &path));
+fn remove_dir(path: &PathBuf) {
+    fs::remove_dir_all(path).expect("couldn't remove dir");
 }
 
-fn remove_dir(path: &str) {
-    fs::remove_dir_all(path).expect(&format!("couldn't remove dir: {}", &path));
-}
-
-fn setup() -> String {
-    let root = format!("./tmp-{}/", get_rand_string());
+fn setup() -> PathBuf {
+    let root = PathBuf::from(format!("./tmp-{}/", get_rand_string()));
     root
 }
 
 fn get_rand_string() -> String {
-    thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(30)
-        .collect()
+    thread_rng().sample_iter(&Alphanumeric).take(30).collect()
 }
 
 // https://medium.com/@ericdreichert/test-setup-and-teardown-in-rust-without-a-framework-ba32d97aa5ab
 fn run_test<T>(test: T) -> ()
 where
-    T: FnOnce(&str) -> () + panic::UnwindSafe,
+    T: FnOnce(&PathBuf) -> () + panic::UnwindSafe,
 {
     let root = setup();
 
@@ -48,19 +41,18 @@ where
 #[test]
 fn it_deletes_an_empty_dir() {
     run_test(|root| {
-        let base = "empty-dir";
-        let path = join_path(&root, base);
+        let path = root.join("empty-dir");
         create_dir(&path);
         assert!(nuke::nuke(&path).is_ok());
-        assert_eq!(Path::new(&path).exists(), false);
+        assert_eq!(path.exists(), false);
     });
 }
 
 #[test]
 fn it_deletes_a_nested_dir() {
     run_test(|root| {
-        let base = join_path(&root, "nested-dir/");
-        let path = join_path(&base, "hey/wassup/hello");
+        let base = root.join("nested-dir/");
+        let path = base.join("hey/wassup/hello");
         create_dir(&path);
         assert!(nuke::nuke(&base).is_ok());
         assert_eq!(Path::new(&base).exists(), false);
@@ -70,15 +62,14 @@ fn it_deletes_a_nested_dir() {
 #[test]
 fn it_deletes_a_tree_of_nested_dir() {
     run_test(|root| {
-        let base = "tree-nested-dir/";
-        let path = join_path(&root, base);
-        let path1 = join_path(&path, "hey/wassup/hello");
+        let path = root.join("tree-nested-dir/");
+        let path1 = path.join("hey/wassup/hello");
         create_dir(&path1);
-        let path2 = join_path(&path, "you/already/know");
+        let path2 = path.join("you/already/know");
         create_dir(&path2);
-        let path3 = join_path(&path, "pls/ok");
+        let path3 = path.join("pls/ok");
         create_dir(&path3);
-        let path4 = join_path(&path, "i/had/to/do/it/to/em");
+        let path4 = path.join("i/had/to/do/it/to/em");
         create_dir(&path4);
         assert!(nuke::nuke(&path).is_ok());
         assert_eq!(Path::new(&path).exists(), false);
@@ -89,8 +80,7 @@ fn it_deletes_a_tree_of_nested_dir() {
 fn it_does_nothing_if_non_existent_dir() {
     run_test(|root| {
         create_dir(&root);
-        let base = "non-existent-dir/";
-        let path = join_path(&root, base);
+        let path = root.join("non-existent-dir/");
         assert!(nuke::nuke(&path).is_ok());
     })
 }

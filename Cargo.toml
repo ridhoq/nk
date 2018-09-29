@@ -5,4 +5,8 @@ authors = ["Ridwan Hoq <ridwanhoq@gmail.com>"]
 
 [dependencies]
 crossbeam-deque = "0.6"
+num_cpus = "1.0"
 walkdir = "2"
+
+[dev-dependencies]
+rand = "0.5"

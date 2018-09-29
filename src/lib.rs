@@ -1,4 +1,5 @@
 extern crate crossbeam_deque;
+extern crate num_cpus;
 extern crate walkdir;
 
 use std::collections::HashMap;
@@ -16,12 +17,16 @@ struct NukeDeque {
 }
 
 pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
-    let num_threads = 4;
+    if !Path::new(dir_to_nuke).exists() {
+        return Ok(());
+    }
 
+    let num_threads = num_cpus::get();
+    println!("num of threads: {}", num_threads);
     let mut depth_to_deque: HashMap<usize, NukeDeque> = HashMap::new();
     let mut max_depth: usize = 0;
 
-    for entry in WalkDir::new(dir_to_nuke).sort_by(|a, b| a.depth().cmp(&b.depth()).reverse()) {
+    for entry in WalkDir::new(dir_to_nuke) {
         let entry = entry.unwrap();
         let depth = entry.depth();
         if depth > max_depth {
@@ -41,41 +46,44 @@ pub fn nuke(dir_to_nuke: &str) -> StdResult<()> {
 
     for d in (0..max_depth + 1).rev() {
         let mut threads = vec![];
-        for thread_num in 0..num_threads {
-            let mut nd = depth_to_deque.get_mut(&d).unwrap();
-            let stealer = &nd.stealer;
-            let thread_stealer = stealer.clone();
-            threads.push(
-                thread::Builder::new()
-                    .name(format!("thread-{}", thread_num).to_string())
-                    .spawn(move || {
-                        while !thread_stealer.is_empty() {
-                            let stolen = thread_stealer.steal();
-                            match stolen {
-                                Steal::Data(entry) => {
-                                    let path = Path::new(&entry);
+        let mut nd = depth_to_deque.get_mut(&d).unwrap();
+        if !&nd.stealer.is_empty() {
+            for thread_num in 0..num_threads {
+                let stealer = &nd.stealer;
+                let thread_stealer = stealer.clone();
+                threads.push(
+                    thread::Builder::new()
+                        .name(format!("thread-{}", thread_num).to_string())
+                        .spawn(move || {
+                            while !thread_stealer.is_empty() {
+                                let stolen = thread_stealer.steal();
+                                match stolen {
+                                    Steal::Data(entry) => {
+                                        let path = Path::new(&entry);
+                                        /*
                                     println!(
                                         "{} is deleting: {}",
                                         thread::current().name().unwrap(),
                                         path.display()
                                     );
-                                    if path.is_dir() {
-                                        fs::remove_dir(path).expect("Failed to remove a dir");
+                                    */
+                                        if path.is_dir() {
+                                            fs::remove_dir(path).expect("Failed to remove a dir");
+                                        }
+                                        if path.is_file() {
+                                            fs::remove_file(path).expect("Failed to remove a file");
+                                        }
                                     }
-                                    if path.is_file() {
-                                        fs::remove_file(path).expect("Failed to remove a file");
-                                    }
+                                    Steal::Empty => {}
+                                    Steal::Retry => {}
                                 }
-                                Steal::Empty => {}
-                                Steal::Retry => {}
                             }
-                        }
-                    }),
-            )
-        }
-
-        for t in threads {
-            let _ = t.unwrap().join();
+                        }),
+                )
+            }
+            for t in threads {
+                let _ = t.unwrap().join();
+            }
         }
     }
     Ok(())

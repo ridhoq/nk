@@ -1,5 +1,5 @@
 extern crate nuke;
 
 fn main() -> std::io::Result<()> {
-    nuke::nuke("./node_modules_nuke/node_modules")
+    nuke::nuke("./node_modules")
 }

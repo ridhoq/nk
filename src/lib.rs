@@ -5,7 +5,7 @@ extern crate walkdir;
 use std::collections::HashMap;
 use std::fs;
 use std::io::Result as StdResult;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::thread;
 
 use self::crossbeam_deque::{self as deque, Steal, Stealer, Worker};
@@ -57,13 +57,12 @@ pub fn nuke(dir_to_nuke: &PathBuf) -> StdResult<()> {
                             while !thread_stealer.is_empty() {
                                 let stolen = thread_stealer.steal();
                                 match stolen {
-                                    Steal::Data(path_buf) => {
-                                        let path = path_buf.as_path();
+                                    Steal::Data(path) => {
                                         if path.is_dir() {
-                                            fs::remove_dir(path).expect("Failed to remove a dir");
+                                            fs::remove_dir(&path).expect("Failed to remove a dir");
                                         }
                                         if path.is_file() {
-                                            fs::remove_file(path).expect("Failed to remove a file");
+                                            fs::remove_file(&path).expect("Failed to remove a file");
                                         }
                                     }
                                     Steal::Empty => {}

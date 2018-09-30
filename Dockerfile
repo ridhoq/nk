@@ -1,6 +1,6 @@
 FROM rust:1.29.0
 
-WORKDIR /usr/src/myapp
+WORKDIR /nuke
 COPY . .
 
 RUN cargo build --release

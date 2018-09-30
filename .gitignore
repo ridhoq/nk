@@ -1,6 +1,4 @@
 /target
 **/*.rs.bk
-node_modules
-node_modules_nuke
-node_modules_rmdir
+/.cargo
 /tmp

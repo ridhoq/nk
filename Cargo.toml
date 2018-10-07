@@ -2,10 +2,13 @@
 name = "nuke"
 version = "0.0.1"
 authors = ["Ridwan Hoq <ridwanhoq@gmail.com>"]
+description = "an `rm -rf` replacement - recursively delete a given path"
 
 [dependencies]
+dunce = "0.1"
 crossbeam-deque = "0.6"
 num_cpus = "1.0"
+structopt = "0.2"
 walkdir = "2"
 
 [dev-dependencies]

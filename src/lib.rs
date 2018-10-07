@@ -62,7 +62,8 @@ pub fn nuke(dir_to_nuke: &PathBuf) -> StdResult<()> {
                                             fs::remove_dir(&path).expect("Failed to remove a dir");
                                         }
                                         if path.is_file() {
-                                            fs::remove_file(&path).expect("Failed to remove a file");
+                                            fs::remove_file(&path)
+                                                .expect("Failed to remove a file");
                                         }
                                     }
                                     Steal::Empty => {}

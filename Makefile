@@ -14,10 +14,13 @@ endif
 
 dr = docker run -it --rm -v ${pwd}:/nuke -e CARGO_HOME=/nuke/.cargo ${image_tag}
 
-.PHONY: docker_build docker_run
+.PHONY: docker_build docker_bash docker_test
 
 docker_build:
 	docker build -t ${image_tag} .
 
-docker_run:
+docker_bash:
 	${dr} /bin/bash
+
+docker_test:
+	${dr} cargo test --release

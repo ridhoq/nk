@@ -5,11 +5,16 @@ authors = ["Ridwan Hoq <ridwanhoq@gmail.com>"]
 description = "an `rm -rf` replacement - recursively delete a given path"
 
 [dependencies]
-dunce = "0.1"
 crossbeam-deque = "0.6"
+dunce = "0.1"
 num_cpus = "1.0"
 structopt = "0.2"
 walkdir = "2"
 
 [dev-dependencies]
+criterion = "0.2"
 rand = "0.5"
+
+[[bench]]
+name = "delete_files"
+harness = false

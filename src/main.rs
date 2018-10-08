@@ -1,5 +1,5 @@
-extern crate nuke;
 extern crate dunce;
+extern crate nuke;
 #[macro_use]
 extern crate structopt;
 
@@ -22,7 +22,10 @@ fn main() -> std::io::Result<()> {
     let opt = Opt::from_args();
 
     if opt.path.exists() && !opt.force {
-        println!("Press Y to nuke: {}", dunce::canonicalize(&opt.path).unwrap().display());
+        println!(
+            "Press Y to nuke: {}",
+            dunce::canonicalize(&opt.path).unwrap().display()
+        );
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
         if input.trim().to_uppercase() != "Y" {

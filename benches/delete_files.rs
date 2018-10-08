@@ -19,10 +19,11 @@ fn delete_one_file(c: &mut Criterion) {
 }
 
 fn write_one_file(base_path: &str) -> PathBuf {
-    let mut path = PathBuf::from(base_path);
+    let path = PathBuf::from(base_path);
     utils::write_dir(&path);
-    path.push("file.txt");
-    utils::write_file(FILE_SIZE, &path);
+    let mut file_path = PathBuf::from(&path);
+    file_path.push("file.txt");
+    utils::write_file(FILE_SIZE, &file_path);
     path
 }
 

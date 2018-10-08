@@ -16,5 +16,5 @@ criterion = "0.2"
 rand = "0.5"
 
 [[bench]]
-name = "delete_one_file"
+name = "delete_files"
 harness = false
